@@ -107,11 +107,6 @@ export default function AdminLoginPage() {
           </button>
         </form>
 
-        <div className="text-center pt-2 border-t border-zinc-800">
-          <p className="text-[11px] text-zinc-500">
-            Protected Administrative Console • Banat Haleema Luxury Abayas
-          </p>
-        </div>
       </div>
     </div>
   );
