@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
 import { Store, Lock, Mail, Loader2, ArrowRight } from "lucide-react";
+import { loginAction } from "./actions";
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
@@ -16,76 +16,102 @@ export default function AdminLoginPage() {
     setError(null);
 
     try {
-      const res = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
-
+      const res = await loginAction(email, password);
       if (res?.error) {
-        setError("Invalid email or password. Please try again.");
+        setError(res.error);
+        setLoading(false);
       } else {
         window.location.href = "/dashboard";
       }
-    } catch {
-      setError("An unexpected error occurred.");
-    } finally {
+    } catch (err: unknown) {
+      if (
+        typeof err === "object" &&
+        err !== null &&
+        "digest" in err &&
+        typeof (err as { digest?: string }).digest === "string" &&
+        (err as { digest: string }).digest.startsWith("NEXT_REDIRECT")
+      ) {
+        window.location.href = "/dashboard";
+        return;
+      }
+      setError("Invalid email or password. Please try again.");
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950">
-      <div className="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-2xl p-8 shadow-2xl space-y-8">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-[#FAF9F6] text-neutral-900">
+      <div className="w-full max-w-md bg-white border border-neutral-200/80 rounded-3xl p-8 shadow-sm space-y-8">
         {/* Header */}
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl mb-2">
-            <Store className="w-8 h-8 text-amber-500" />
+          <div className="inline-flex items-center justify-center p-3.5 bg-amber-50 border border-amber-200/60 rounded-2xl mb-2 text-amber-600">
+            <Store className="w-8 h-8" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">
-            Banat Haleema Admin
+          <h1 className="font-serif text-3xl font-bold tracking-tight text-neutral-900">
+            Banat Halima
           </h1>
-          <p className="text-xs text-zinc-400">
-            Sign in to manage inventory, products, and customer orders
+          <p className="text-xs text-neutral-500 font-sans tracking-wide uppercase font-medium">
+            Admin Panel Sign In
           </p>
         </div>
 
+        {/* Demo Credentials Helper */}
+        <div className="p-4 bg-amber-50/70 border border-amber-200/80 rounded-2xl space-y-2">
+          <div className="flex items-center justify-between text-xs text-amber-900 font-semibold">
+            <span>🔑 Quick Demo Login:</span>
+            <button
+              type="button"
+              onClick={() => {
+                setEmail("admin@banathaleema.com");
+                setPassword("admin123");
+              }}
+              className="text-[11px] bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-1 rounded-lg transition-colors font-medium cursor-pointer shadow-2xs"
+            >
+              Fill Credentials
+            </button>
+          </div>
+          <div className="text-xs text-neutral-700 space-y-0.5 font-mono">
+            <div><span className="text-neutral-400">Email:</span> admin@banathaleema.com</div>
+            <div><span className="text-neutral-400">Password:</span> admin123</div>
+          </div>
+        </div>
+
         {error && (
-          <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg text-xs text-center font-medium">
+          <div className="p-3.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-xs text-center font-medium">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">
               Admin Email
             </label>
             <div className="relative">
-              <Mail className="w-4 h-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Mail className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg pl-10 pr-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500"
+                className="w-full bg-neutral-50/50 border border-neutral-200 rounded-xl pl-10 pr-4 py-3 text-neutral-900 text-sm focus:outline-none focus:border-amber-500 focus:bg-white transition-all"
                 placeholder="admin@banathaleema.com"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">
               Password
             </label>
             <div className="relative">
-              <Lock className="w-4 h-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Lock className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg pl-10 pr-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500"
+                className="w-full bg-neutral-50/50 border border-neutral-200 rounded-xl pl-10 pr-4 py-3 text-neutral-900 text-sm focus:outline-none focus:border-amber-500 focus:bg-white transition-all"
                 placeholder="••••••••"
               />
             </div>
@@ -94,10 +120,10 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-amber-500 hover:bg-amber-400 text-zinc-950 font-semibold py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors text-sm disabled:opacity-50 mt-6"
+            className="w-full bg-neutral-950 hover:bg-neutral-800 text-white font-medium py-3 rounded-xl flex items-center justify-center space-x-2 transition-all text-sm disabled:opacity-50 mt-6 shadow-xs"
           >
             {loading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="w-4 h-4 animate-spin text-white" />
             ) : (
               <>
                 <span>Sign In to Dashboard</span>
@@ -106,7 +132,6 @@ export default function AdminLoginPage() {
             )}
           </button>
         </form>
-
       </div>
     </div>
   );

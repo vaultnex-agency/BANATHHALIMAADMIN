@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { Package, PlusCircle, Edit } from "lucide-react";
+import { Plus, Edit } from "lucide-react";
 import { getProducts } from "@/lib/data/products";
 import { DeleteProductButton } from "./DeleteProductButton";
+import { StatusBadge } from "@/components/admin/StatusBadge";
 
 export const revalidate = 0;
 
@@ -9,35 +10,34 @@ export default async function AdminProductsPage() {
   const products = await getProducts();
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-12">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-800 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
-            <Package className="w-6 h-6 text-amber-500" />
-            <span>Product Inventory Management</span>
+          <h1 className="font-serif text-3xl md:text-4xl font-bold tracking-tight text-neutral-900">
+            Products
           </h1>
-          <p className="text-sm text-zinc-400">
-            Create, edit, and manage store abayas and accessories
+          <p className="text-sm text-neutral-500 mt-1 font-normal">
+            {products.length} total products
           </p>
         </div>
 
         <Link
           href="/products/new"
-          className="inline-flex items-center space-x-2 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-semibold px-4 py-2.5 rounded-lg text-sm transition-colors"
+          className="inline-flex items-center justify-center space-x-2 bg-amber-500 hover:bg-amber-600 text-white font-medium px-5 py-2.5 rounded-xl text-sm transition-all shadow-xs shrink-0"
         >
-          <PlusCircle className="w-4 h-4" />
-          <span>Add New Product</span>
+          <Plus className="w-4 h-4 stroke-[2.5]" />
+          <span>Add Product</span>
         </Link>
       </div>
 
-      {/* Products Table */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-xl">
+      {/* Products Table Container */}
+      <div className="bg-white rounded-2xl border border-neutral-200/80 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-zinc-300">
-            <thead className="bg-zinc-950/60 text-xs uppercase tracking-wider text-zinc-400 border-b border-zinc-800">
-              <tr>
-                <th className="px-6 py-4">Product Details</th>
+          <table className="w-full text-left text-sm text-neutral-700 border-collapse">
+            <thead>
+              <tr className="bg-neutral-50/80 text-[11px] uppercase tracking-wider text-neutral-400 font-semibold border-b border-neutral-100">
+                <th className="px-6 py-4">Product</th>
                 <th className="px-6 py-4">Category</th>
                 <th className="px-6 py-4">Price</th>
                 <th className="px-6 py-4">Stock</th>
@@ -45,9 +45,10 @@ export default async function AdminProductsPage() {
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-800/60">
+            <tbody className="divide-y divide-neutral-100">
               {products.map((product) => (
-                <tr key={product.id} className="hover:bg-zinc-800/40 transition-colors">
+                <tr key={product.id} className="hover:bg-neutral-50/60 transition-colors">
+                  {/* Product Column */}
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-4">
                       {product.images[0] ? (
@@ -55,46 +56,81 @@ export default async function AdminProductsPage() {
                         <img
                           src={product.images[0]}
                           alt={product.name}
-                          className="w-12 h-12 object-cover rounded-lg border border-zinc-800"
+                          className="w-12 h-12 object-cover rounded-xl border border-neutral-200/80 bg-neutral-100 shrink-0"
                         />
                       ) : (
-                        <div className="w-12 h-12 bg-zinc-800 rounded-lg flex items-center justify-center text-xs text-zinc-500">
-                          No img
+                        <div className="w-12 h-12 bg-neutral-100 rounded-xl border border-neutral-200/80 flex items-center justify-center text-[10px] text-neutral-400 uppercase font-medium shrink-0">
+                          No Image
                         </div>
                       )}
                       <div>
-                        <div className="font-semibold text-white">{product.name}</div>
-                        <div className="text-xs text-zinc-500 font-mono">/{product.slug}</div>
+                        <div className="font-semibold text-neutral-900 text-sm">
+                          {product.name}
+                        </div>
+                        {product.fabric && (
+                          <div className="text-xs text-neutral-500 font-normal mt-0.5">
+                            {product.fabric}
+                          </div>
+                        )}
+                        {/* Optional Badges */}
+                        <div className="flex items-center gap-1.5 mt-1">
+                          {product.isNew && (
+                            <span className="text-[10px] bg-amber-50 text-amber-700 border border-amber-200/60 px-1.5 py-0.2 rounded font-medium">
+                              New
+                            </span>
+                          )}
+                          {product.isBestSeller && (
+                            <span className="text-[10px] bg-purple-50 text-purple-700 border border-purple-200/60 px-1.5 py-0.2 rounded font-medium">
+                              Best Seller
+                            </span>
+                          )}
+                          {product.isFeatured && (
+                            <span className="text-[10px] bg-sky-50 text-sky-700 border border-sky-200/60 px-1.5 py-0.2 rounded font-medium">
+                              Featured
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-xs">
-                    <span className="bg-zinc-800 text-zinc-300 px-2.5 py-1 rounded-md border border-zinc-700">
+
+                  {/* Category Column */}
+                  <td className="px-6 py-4 text-xs font-medium">
+                    <span className="bg-neutral-100 text-neutral-700 px-2.5 py-1 rounded-lg border border-neutral-200/50">
                       {product.category}
                     </span>
                   </td>
-                  <td className="px-6 py-4 font-semibold text-white font-mono">
-                    {product.price.toLocaleString("en-AE")} AED
+
+                  {/* Price Column */}
+                  <td className="px-6 py-4 font-mono text-sm font-semibold text-neutral-900">
+                    <div className="flex items-baseline space-x-2">
+                      <span>AED {product.price.toLocaleString("en-AE")}</span>
+                      {product.originalPrice && product.originalPrice > product.price && (
+                        <span className="text-xs text-neutral-400 line-through font-normal">
+                          AED {product.originalPrice.toLocaleString("en-AE")}
+                        </span>
+                      )}
+                    </div>
                   </td>
-                  <td className="px-6 py-4 text-xs font-mono">
+
+                  {/* Stock Column */}
+                  <td className="px-6 py-4 text-xs font-mono text-neutral-600">
                     {product.stockCount} units
                   </td>
+
+                  {/* Status Column */}
                   <td className="px-6 py-4">
-                    <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        product.inStock
-                          ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                          : "bg-red-500/10 text-red-400 border border-red-500/20"
-                      }`}
-                    >
-                      {product.inStock ? "In Stock" : "Out of Stock"}
-                    </span>
+                    <StatusBadge
+                      status={product.inStock ? "in_stock" : "out_of_stock"}
+                    />
                   </td>
+
+                  {/* Actions Column */}
                   <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end space-x-2">
+                    <div className="flex items-center justify-end space-x-1">
                       <Link
                         href={`/products/${product.id}`}
-                        className="p-1.5 text-zinc-400 hover:text-amber-300 hover:bg-zinc-800 rounded-lg transition-colors"
+                        className="p-2 text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors"
                         title="Edit product"
                       >
                         <Edit className="w-4 h-4" />

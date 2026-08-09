@@ -33,11 +33,11 @@ export function DeleteProductButton({ productId }: { productId: string }) {
     <button
       onClick={handleDelete}
       disabled={loading}
-      className="p-1.5 text-zinc-400 hover:text-red-400 hover:bg-red-950/30 rounded-lg transition-colors disabled:opacity-50"
+      className="p-2 text-neutral-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors disabled:opacity-50"
       title="Delete product"
     >
       {loading ? (
-        <Loader2 className="w-4 h-4 animate-spin" />
+        <Loader2 className="w-4 h-4 animate-spin text-rose-600" />
       ) : (
         <Trash2 className="w-4 h-4" />
       )}

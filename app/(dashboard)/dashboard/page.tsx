@@ -1,5 +1,11 @@
 import Link from "next/link";
-import { Package, ShoppingBag, DollarSign, TrendingUp, PlusCircle, ArrowRight } from "lucide-react";
+import {
+  ShoppingBag,
+  Package,
+  TrendingUp,
+  ArrowRight,
+  Clock,
+} from "lucide-react";
 import { getProducts } from "@/lib/data/products";
 import { getOrders } from "@/lib/data/orders";
 import { OrderStatusBadge } from "../orders/OrderStatusBadge";
@@ -12,142 +18,161 @@ export default async function AdminDashboardPage() {
   const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
   const pendingOrders = orders.filter((o) => o.status === "pending").length;
   const inStockProducts = products.filter((p) => p.inStock).length;
+  const avgOrderValue = orders.length > 0 ? Math.round(totalRevenue / orders.length) : 0;
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-800 pb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">
-            Dashboard Overview
-          </h1>
-          <p className="text-sm text-zinc-400">
-            Real-time analytics and store management summary
-          </p>
-        </div>
-
-        <Link
-          href="/products/new"
-          className="inline-flex items-center space-x-2 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-semibold px-4 py-2.5 rounded-lg text-sm transition-colors"
-        >
-          <PlusCircle className="w-4 h-4" />
-          <span>Add New Product</span>
-        </Link>
+    <div className="space-y-8 pb-12">
+      {/* Page Header */}
+      <div className="space-y-1">
+        <h1 className="font-serif text-3xl md:text-4xl font-bold tracking-tight text-neutral-900">
+          Dashboard
+        </h1>
+        <p className="text-sm text-neutral-500 font-normal">
+          Welcome back — here&apos;s what&apos;s happening today.
+        </p>
       </div>
 
-      {/* Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 space-y-2">
+      {/* 4 Statistic Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        {/* Card 1: TOTAL REVENUE (Emphasized Black Card) */}
+        <div className="bg-neutral-950 text-white rounded-2xl p-6 shadow-sm border border-neutral-900 flex flex-col justify-between space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
+            <span className="text-[11px] font-medium uppercase tracking-wider text-neutral-400">
               Total Revenue
             </span>
-            <DollarSign className="w-5 h-5 text-amber-400" />
+            <div className="w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center">
+              <TrendingUp className="w-4 h-4" />
+            </div>
           </div>
-          <p className="text-2xl font-bold text-white">
-            {totalRevenue.toLocaleString("en-AE")} <span className="text-xs font-normal text-zinc-400">AED</span>
-          </p>
-          <span className="text-[11px] text-emerald-400 flex items-center gap-1">
-            <TrendingUp className="w-3 h-3" /> Live store total
-          </span>
+          <div>
+            <p className="text-2xl md:text-3xl font-bold font-serif tracking-tight text-white">
+              AED {totalRevenue.toLocaleString("en-AE")}
+            </p>
+            <p className="text-xs text-neutral-400 mt-1">
+              {orders.length} total orders
+            </p>
+          </div>
         </div>
 
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 space-y-2">
+        {/* Card 2: PENDING ORDERS */}
+        <div className="bg-white rounded-2xl p-6 border border-neutral-200/80 shadow-xs flex flex-col justify-between space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
-              Total Orders
+            <span className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">
+              Pending Orders
             </span>
-            <ShoppingBag className="w-5 h-5 text-blue-400" />
+            <div className="w-8 h-8 rounded-full bg-amber-50 text-amber-700 flex items-center justify-center">
+              <Clock className="w-4 h-4" />
+            </div>
           </div>
-          <p className="text-2xl font-bold text-white">{orders.length}</p>
-          <span className="text-[11px] text-amber-400 font-mono">
-            {pendingOrders} pending fulfillment
-          </span>
+          <div>
+            <p className="text-2xl md:text-3xl font-bold font-serif tracking-tight text-neutral-900">
+              {pendingOrders}
+            </p>
+            <p className="text-xs text-amber-700 font-medium mt-1">
+              Awaiting confirmation
+            </p>
+          </div>
         </div>
 
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 space-y-2">
+        {/* Card 3: PRODUCTS */}
+        <div className="bg-white rounded-2xl p-6 border border-neutral-200/80 shadow-xs flex flex-col justify-between space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
-              Total Products
+            <span className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">
+              Products
             </span>
-            <Package className="w-5 h-5 text-purple-400" />
+            <div className="w-8 h-8 rounded-full bg-neutral-100 text-neutral-700 flex items-center justify-center">
+              <Package className="w-4 h-4" />
+            </div>
           </div>
-          <p className="text-2xl font-bold text-white">{products.length}</p>
-          <span className="text-[11px] text-zinc-400">
-            {inStockProducts} in stock
-          </span>
+          <div>
+            <p className="text-2xl md:text-3xl font-bold font-serif tracking-tight text-neutral-900">
+              {products.length}
+            </p>
+            <p className="text-xs text-neutral-500 mt-1">
+              {inStockProducts} in stock
+            </p>
+          </div>
         </div>
 
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 space-y-2">
+        {/* Card 4: AVG. ORDER VALUE */}
+        <div className="bg-white rounded-2xl p-6 border border-neutral-200/80 shadow-xs flex flex-col justify-between space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
-              Supabase Status
+            <span className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">
+              Avg. Order Value
             </span>
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+            <div className="w-8 h-8 rounded-full bg-neutral-100 text-neutral-700 flex items-center justify-center">
+              <ShoppingBag className="w-4 h-4" />
+            </div>
           </div>
-          <p className="text-sm font-semibold text-zinc-200">Data Abstraction Ready</p>
-          <span className="text-[11px] text-zinc-400">
-            Ready for Supabase Auth & Storage
-          </span>
+          <div>
+            <p className="text-2xl md:text-3xl font-bold font-serif tracking-tight text-neutral-900">
+              AED {avgOrderValue.toLocaleString("en-AE")}
+            </p>
+            <p className="text-xs text-neutral-500 mt-1">
+              Per successful order
+            </p>
+          </div>
         </div>
       </div>
 
       {/* Recent Orders Section */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
-        <div className="p-6 border-b border-zinc-800 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-white">Recent Orders</h2>
+      <div className="bg-white rounded-2xl border border-neutral-200/80 shadow-xs overflow-hidden">
+        <div className="p-6 border-b border-neutral-100 flex items-center justify-between">
+          <div>
+            <h2 className="font-serif text-xl font-bold text-neutral-900">Recent Orders</h2>
+            <p className="text-xs text-neutral-400 mt-0.5">Latest customer transactions</p>
+          </div>
           <Link
             href="/orders"
-            className="text-xs text-amber-400 hover:text-amber-300 flex items-center gap-1 font-medium"
+            className="text-xs font-medium text-amber-700 hover:text-amber-800 flex items-center gap-1.5 hover:underline"
           >
-            <span>View All Orders</span>
+            <span>View all</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-zinc-300">
-            <thead className="bg-zinc-950/60 text-xs uppercase tracking-wider text-zinc-400 border-b border-zinc-800">
-              <tr>
-                <th className="px-6 py-3">Order ID</th>
-                <th className="px-6 py-3">Customer</th>
-                <th className="px-6 py-3">Items</th>
-                <th className="px-6 py-3">Total</th>
-                <th className="px-6 py-3">Status</th>
-                <th className="px-6 py-3 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-800/60">
-              {orders.slice(0, 5).map((order) => (
-                <tr key={order.id} className="hover:bg-zinc-800/40 transition-colors">
-                  <td className="px-6 py-4 font-mono text-xs text-amber-400">
-                    {order.orderNumber || order.id}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="font-medium text-white">{order.customer.fullName}</div>
-                    <div className="text-xs text-zinc-500">{order.customer.phone}</div>
-                  </td>
-                  <td className="px-6 py-4 text-xs text-zinc-400">
-                    {order.items.length} item(s)
-                  </td>
-                  <td className="px-6 py-4 font-semibold text-white">
-                    {order.total.toLocaleString("en-AE")} AED
-                  </td>
-                  <td className="px-6 py-4">
-                    <OrderStatusBadge status={order.status} />
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <Link
-                      href={`/orders/${order.id}`}
-                      className="text-xs text-zinc-400 hover:text-amber-300 underline"
-                    >
-                      Manage
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="divide-y divide-neutral-100">
+          {orders.slice(0, 5).map((order) => (
+            <div
+              key={order.id}
+              className="p-5 flex items-center justify-between hover:bg-neutral-50/60 transition-colors"
+            >
+              <div className="flex items-center space-x-4">
+                <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center text-xs font-semibold text-neutral-700 shrink-0">
+                  {order.customer.fullName.substring(0, 2).toUpperCase()}
+                </div>
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <span className="font-mono text-xs font-semibold text-neutral-900">
+                      {order.orderNumber || order.id}
+                    </span>
+                    <span className="text-neutral-300">•</span>
+                    <span className="text-sm font-medium text-neutral-900">
+                      {order.customer.fullName}
+                    </span>
+                  </div>
+                  <div className="text-xs text-neutral-400 mt-0.5">
+                    {order.items.length} item(s) • {new Date(order.createdAt).toLocaleDateString("en-AE", { month: "short", day: "numeric" })}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-6">
+                <OrderStatusBadge status={order.status} />
+                <div className="text-right">
+                  <p className="text-sm font-semibold text-neutral-900 font-mono">
+                    AED {order.total.toLocaleString("en-AE")}
+                  </p>
+                </div>
+                <Link
+                  href={`/orders/${order.id}`}
+                  className="p-2 text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors"
+                >
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

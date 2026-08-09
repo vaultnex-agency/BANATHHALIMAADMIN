@@ -1,9 +1,22 @@
 import type { Metadata } from "next";
+import { Cormorant_Garamond, Inter } from "next/font/google";
 import "./globals.css";
 
+const serifFont = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-serif",
+});
+
+const sansFont = Inter({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-sans",
+});
+
 export const metadata: Metadata = {
-  title: "Banat Haleema — Admin Dashboard",
-  description: "Administrative Management Panel for Banat Haleema Luxury Abayas",
+  title: "Banat Halima — Admin Panel",
+  description: "Administrative Management Panel for Banat Halima Luxury Fashion",
 };
 
 export default function RootLayout({
@@ -12,8 +25,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className="antialiased bg-zinc-950 text-zinc-100 min-h-screen">
+    <html lang="en" className={`${serifFont.variable} ${sansFont.variable}`}>
+      <body className="antialiased bg-[#FAF9F6] text-neutral-900 min-h-screen selection:bg-amber-100 selection:text-amber-900">
         {children}
       </body>
     </html>
