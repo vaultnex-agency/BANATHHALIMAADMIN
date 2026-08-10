@@ -1,15 +1,9 @@
+import { getSupabaseAdminClient, BUCKETS } from "@/lib/supabase";
+
 /**
  * Product Image Storage Abstraction Service (Banat Halima)
- * 
- * Modular service layer for handling product image validation, uploads,
- * deletions, and public URL resolution.
- * 
- * TEMPORARY DEVELOPMENT BEHAVIOR:
- * Generates local Object URLs (blobs) and path references for immediate UI previews.
- * 
- * FUTURE SUPABASE STORAGE INTEGRATION:
- * When Supabase is connected, replace the local blob handler with:
- * `supabase.storage.from('product-images').upload(filePath, file)`
+ * Handles image validation, uploads to Supabase Storage ('product-images' bucket),
+ * deletions, and public URL resolution, with fallback for offline/local development.
  */
 
 export interface StorageUploadResult {
@@ -54,8 +48,8 @@ export function validateImageFile(file: File): ValidationResult {
 }
 
 /**
- * Uploads a product image file.
- * Returns local object URL for preview and path reference.
+ * Uploads a product image file to Supabase Storage if available,
+ * otherwise creates a local Object URL preview.
  */
 export async function uploadProductImage(
   file: File,
@@ -66,33 +60,43 @@ export async function uploadProductImage(
     throw new Error(validation.error || "Invalid image file.");
   }
 
-  // Generate unique filename identifier
+  const supabase = getSupabaseAdminClient();
   const fileExt = file.name.split(".").pop() || "jpg";
   const uniqueId = Math.random().toString(36).substring(2, 9);
-  const targetPath = `product-images/${productId || "new"}/${uniqueId}.${fileExt}`;
+  const targetPath = `${productId || "products"}/${Date.now()}-${uniqueId}.${fileExt}`;
 
-  // Local object URL for development preview
+  if (supabase) {
+    try {
+      const { data, error } = await supabase.storage
+        .from(BUCKETS.PRODUCT_IMAGES)
+        .upload(targetPath, file, {
+          cacheControl: "3600",
+          upsert: true,
+        });
+
+      if (error) {
+        console.error("Supabase Storage Upload Error:", error);
+        throw new Error(`Failed to upload to Supabase: ${error.message}`);
+      }
+
+      const { data: publicUrlData } = supabase.storage
+        .from(BUCKETS.PRODUCT_IMAGES)
+        .getPublicUrl(data.path);
+
+      return {
+        url: publicUrlData.publicUrl,
+        path: publicUrlData.publicUrl,
+      };
+    } catch (err) {
+      console.warn("Supabase Storage upload failed, falling back to local preview:", err);
+    }
+  }
+
+  // Local object URL fallback
   const localPreviewUrl = URL.createObjectURL(file);
-
-  /*
-   * TODO: FUTURE SUPABASE STORAGE INTEGRATION
-   * 
-   * When Supabase is connected:
-   * 1. Import getSupabaseAdminConfig or getSupabaseClient
-   * 2. Upload file to Supabase bucket:
-   *    const { data, error } = await supabase.storage
-   *      .from('product-images')
-   *      .upload(targetPath, file, { upsert: true });
-   * 3. Get public URL:
-   *    const { data: { publicUrl } } = supabase.storage
-   *      .from('product-images')
-   *      .getPublicUrl(targetPath);
-   * 4. return { url: publicUrl, path: targetPath };
-   */
-
   return {
     url: localPreviewUrl,
-    path: localPreviewUrl, // Temporary preview reference
+    path: localPreviewUrl,
   };
 }
 
@@ -106,37 +110,51 @@ export async function deleteProductImage(pathOrUrl: string): Promise<boolean> {
     } catch {
       // Ignore cleanup errors for local blobs
     }
+    return true;
   }
 
-  /*
-   * TODO: FUTURE SUPABASE STORAGE INTEGRATION
-   * 
-   * When Supabase is connected:
-   * const { error } = await supabase.storage
-   *   .from('product-images')
-   *   .remove([pathOrUrl]);
-   * return !error;
-   */
+  const supabase = getSupabaseAdminClient();
+  if (supabase && (pathOrUrl.includes("/storage/v1/object/public/") || !pathOrUrl.startsWith("/"))) {
+    try {
+      const storagePath = pathOrUrl.includes("/product-images/")
+        ? pathOrUrl.split("/product-images/").pop()!
+        : pathOrUrl;
+
+      const { error } = await supabase.storage
+        .from(BUCKETS.PRODUCT_IMAGES)
+        .remove([storagePath]);
+
+      if (error) {
+        console.error("Supabase Storage Delete Error:", error);
+        return false;
+      }
+      return true;
+    } catch (err) {
+      console.error("Supabase Storage delete exception:", err);
+    }
+  }
 
   return true;
 }
 
 /**
  * Resolves full public URL for rendering product images in <img> tags.
- * Supports local blob URLs, relative /public paths, http(s) URLs, and future Supabase Storage URLs.
  */
 export function getProductImageUrl(pathOrUrl: string): string {
   if (!pathOrUrl) return "/product-teal.png";
-  if (pathOrUrl.startsWith("http://") || pathOrUrl.startsWith("https://") || pathOrUrl.startsWith("blob:") || pathOrUrl.startsWith("/")) {
+  if (
+    pathOrUrl.startsWith("http://") ||
+    pathOrUrl.startsWith("https://") ||
+    pathOrUrl.startsWith("blob:") ||
+    pathOrUrl.startsWith("/")
+  ) {
     return pathOrUrl;
   }
 
-  /*
-   * TODO: FUTURE SUPABASE STORAGE INTEGRATION
-   * 
-   * If pathOrUrl is a Supabase Storage path (e.g. "product-images/p1/img.webp"):
-   * return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${pathOrUrl}`;
-   */
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (supabaseUrl) {
+    return `${supabaseUrl}/storage/v1/object/public/${BUCKETS.PRODUCT_IMAGES}/${pathOrUrl}`;
+  }
 
   return `/${pathOrUrl}`;
 }
