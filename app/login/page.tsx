@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Store, Lock, Mail, Loader2, ArrowRight } from "lucide-react";
+import { Store, Lock, Mail, Loader2, ArrowRight, ShieldCheck } from "lucide-react";
 import { loginAction } from "./actions";
 
 export default function AdminLoginPage() {
@@ -24,24 +24,15 @@ export default function AdminLoginPage() {
         window.location.href = "/dashboard";
       }
     } catch (err: unknown) {
-      if (
-        typeof err === "object" &&
-        err !== null &&
-        "digest" in err &&
-        typeof (err as { digest?: string }).digest === "string" &&
-        (err as { digest: string }).digest.startsWith("NEXT_REDIRECT")
-      ) {
-        window.location.href = "/dashboard";
-        return;
-      }
-      setError("Invalid email or password. Please try again.");
+      const msg = err instanceof Error ? err.message : "Invalid credentials. Please try again.";
+      setError(msg);
       setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-[#FAF9F6] text-neutral-900">
-      <div className="w-full max-w-md bg-white border border-neutral-200/80 rounded-3xl p-8 shadow-sm space-y-8">
+      <div className="w-full max-w-md bg-white border border-neutral-200/80 rounded-3xl p-8 shadow-xs space-y-8">
         {/* Header */}
         <div className="text-center space-y-2">
           <div className="inline-flex items-center justify-center p-3.5 bg-amber-50 border border-amber-200/60 rounded-2xl mb-2 text-amber-600">
@@ -50,30 +41,10 @@ export default function AdminLoginPage() {
           <h1 className="font-serif text-3xl font-bold tracking-tight text-neutral-900">
             Banat Halima
           </h1>
-          <p className="text-xs text-neutral-500 font-sans tracking-wide uppercase font-medium">
-            Admin Panel Sign In
+          <p className="text-xs text-neutral-500 font-sans tracking-wide uppercase font-medium flex items-center justify-center gap-1.5">
+            <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
+            <span>Supabase Secure Admin Sign In</span>
           </p>
-        </div>
-
-        {/* Demo Credentials Helper */}
-        <div className="p-4 bg-amber-50/70 border border-amber-200/80 rounded-2xl space-y-2">
-          <div className="flex items-center justify-between text-xs text-amber-900 font-semibold">
-            <span>🔑 Quick Demo Login:</span>
-            <button
-              type="button"
-              onClick={() => {
-                setEmail("admin@banathaleema.com");
-                setPassword("admin123");
-              }}
-              className="text-[11px] bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-1 rounded-lg transition-colors font-medium cursor-pointer shadow-2xs"
-            >
-              Fill Credentials
-            </button>
-          </div>
-          <div className="text-xs text-neutral-700 space-y-0.5 font-mono">
-            <div><span className="text-neutral-400">Email:</span> admin@banathaleema.com</div>
-            <div><span className="text-neutral-400">Password:</span> admin123</div>
-          </div>
         </div>
 
         {error && (
@@ -120,7 +91,7 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-neutral-950 hover:bg-neutral-800 text-white font-medium py-3 rounded-xl flex items-center justify-center space-x-2 transition-all text-sm disabled:opacity-50 mt-6 shadow-xs"
+            className="w-full bg-neutral-950 hover:bg-neutral-800 text-white font-medium py-3 rounded-xl flex items-center justify-center space-x-2 transition-all text-sm disabled:opacity-50 mt-6 shadow-xs cursor-pointer"
           >
             {loading ? (
               <Loader2 className="w-4 h-4 animate-spin text-white" />

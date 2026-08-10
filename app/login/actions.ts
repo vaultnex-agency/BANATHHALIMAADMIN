@@ -1,26 +1,33 @@
 "use server";
 
-import { signIn } from "@/lib/auth";
-import { AuthError } from "next-auth";
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
 export async function loginAction(email: string, password: string) {
   try {
-    await signIn("credentials", {
+    const supabase = await createClient();
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
-      redirectTo: "/dashboard",
     });
-    return { success: true };
-  } catch (error) {
-    if (error instanceof AuthError) {
-      switch (error.type) {
-        case "CredentialsSignin":
-          return { error: "Invalid email or password." };
-        default:
-          return { error: "Something went wrong." };
-      }
+
+    if (error) {
+      return { error: error.message };
     }
-    // Re-throw redirect errors (Next.js uses thrown errors for redirects)
-    throw error;
+
+    if (data.session) {
+      return { success: true };
+    }
+
+    return { error: "Failed to establish session." };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "An unexpected authentication error occurred.";
+    return { error: msg };
   }
+}
+
+export async function signOutAction() {
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  redirect("/login");
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Package,
@@ -13,8 +13,8 @@ import {
   Menu,
   X,
 } from "lucide-react";
-import { signOut } from "next-auth/react";
 import { useState } from "react";
+import { signOutAction } from "@/app/login/actions";
 
 const navItems = [
   {
@@ -36,8 +36,13 @@ const navItems = [
 
 export function AdminSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const storeUrl = process.env.NEXT_PUBLIC_STORE_URL || "https://banathalima.ae";
+
+  const handleSignOut = async () => {
+    await signOutAction();
+  };
 
   const SidebarContent = (
     <div className="flex flex-col justify-between h-full p-6">
@@ -131,8 +136,8 @@ export function AdminSidebar() {
         </a>
 
         <button
-          onClick={() => signOut({ callbackUrl: "/login" })}
-          className="w-full flex items-center space-x-2.5 px-4 py-2.5 rounded-xl text-xs font-medium text-rose-600 hover:bg-rose-50/70 transition-colors text-left"
+          onClick={handleSignOut}
+          className="w-full flex items-center space-x-2.5 px-4 py-2.5 rounded-xl text-xs font-medium text-rose-600 hover:bg-rose-50/70 transition-colors text-left cursor-pointer"
         >
           <LogOut className="w-3.5 h-3.5" />
           <span>Sign Out</span>

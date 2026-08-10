@@ -1,47 +1,29 @@
-import NextAuth from "next-auth";
-import Credentials from "next-auth/providers/credentials";
+import { createClient } from "@/lib/supabase/server";
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
-  secret: process.env.AUTH_SECRET || "banat-haleema-secret-key-2026-super-secure",
-  providers: [
-    Credentials({
-      name: "Admin Login",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        const adminEmail = process.env.ADMIN_EMAIL || "admin@banathaleema.com";
-        const adminPassword = process.env.ADMIN_PASSWORD || "admin123";
+/**
+ * Supabase Auth Helper Functions for banath-admin
+ */
 
-        if (
-          credentials?.email === adminEmail &&
-          credentials?.password === adminPassword
-        ) {
-          return { id: "1", name: "Admin", email: adminEmail };
-        }
-        return null;
-      },
-    }),
-  ],
-  pages: {
-    signIn: "/login",
-  },
-  callbacks: {
-    authorized({ auth: session, request: { nextUrl } }) {
-      const isLoggedIn = !!session?.user;
-      const isOnLogin = nextUrl.pathname.startsWith("/login");
+export async function getCurrentAdminUser() {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
 
-      if (isOnLogin) {
-        if (isLoggedIn) return Response.redirect(new URL("/dashboard", nextUrl));
-        return true;
-      }
+    if (error || !user) {
+      return null;
+    }
 
-      if (!isLoggedIn) {
-        return Response.redirect(new URL("/login", nextUrl));
-      }
+    return user;
+  } catch (err) {
+    console.error("Error fetching current admin user:", err);
+    return null;
+  }
+}
 
-      return true;
-    },
-  },
-});
+export async function isAuthenticated(): Promise<boolean> {
+  const user = await getCurrentAdminUser();
+  return !!user;
+}
