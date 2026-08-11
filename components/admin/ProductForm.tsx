@@ -62,6 +62,9 @@ const AVAILABLE_OCCASIONS = [
   "Eid",
 ];
 
+const AVAILABLE_SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
+
+
 export function ProductForm({ initialData, isEditing = false }: ProductFormProps) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -95,6 +98,7 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
       { name: "Teal", hex: "#1a7a7a" },
       { name: "Rose", hex: "#d4829e" },
     ],
+    sizes: initialData?.sizes || [],
     occasion: initialData?.occasion || ["Festive", "Wedding"],
   });
 
@@ -227,6 +231,16 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
     });
   };
 
+  const toggleSize = (size: string) => {
+    setFormData((prev) => {
+      const exists = prev.sizes.includes(size);
+      const updated = exists
+        ? prev.sizes.filter((s) => s !== size)
+        : [...prev.sizes, size];
+      return { ...prev, sizes: updated };
+    });
+  };
+
   const toggleOccasion = (occ: string) => {
     setFormData((prev) => {
       const exists = prev.occasion.includes(occ);
@@ -266,7 +280,7 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
         currency: "AED",
         rating: initialData?.rating || 4.8,
         reviewCount: initialData?.reviewCount || 10,
-        sizes: initialData?.sizes || [],
+        sizes: formData.sizes,
         createdAt: initialData?.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -729,6 +743,40 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
                 placeholder="2.25 m"
               />
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* SECTION: Sizes (Ready-Made) */}
+      {formData.productType === "ready-made" && (
+        <div className="bg-white rounded-2xl border border-neutral-200/80 p-6 md:p-8 space-y-6 shadow-xs">
+          <div className="border-b border-neutral-100 pb-3">
+            <h2 className="font-serif text-xl font-bold text-neutral-900">
+              Sizes
+            </h2>
+            <p className="text-xs text-neutral-500 mt-1">
+              Select available sizes for this ready-made product.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            {AVAILABLE_SIZES.map((sz) => {
+              const isSelected = formData.sizes.includes(sz);
+              return (
+                <button
+                  type="button"
+                  key={sz}
+                  onClick={() => toggleSize(sz)}
+                  className={`min-w-[54px] px-4 py-2.5 rounded-xl text-xs font-semibold border transition-all ${
+                    isSelected
+                      ? "bg-neutral-950 text-white border-neutral-950 shadow-2xs"
+                      : "bg-neutral-50/50 text-neutral-700 border-neutral-200 hover:bg-neutral-100 hover:border-neutral-300"
+                  }`}
+                >
+                  {sz}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
