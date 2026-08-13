@@ -24,7 +24,7 @@ export async function getOrders(): Promise<Order[]> {
 
       if (error) {
         console.error("Supabase admin getOrders error:", error);
-      } else if (data && data.length > 0) {
+      } else if (data) {
         return data.map(mapSupabaseRowToOrder);
       }
     } catch (err) {

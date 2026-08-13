@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
     const now = new Date().toISOString();
     const product: Product = {
       ...body,
-      id: `p${Date.now()}`,
+      id: crypto.randomUUID(),
       createdAt: now,
       updatedAt: now,
     };

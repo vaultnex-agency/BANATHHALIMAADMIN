@@ -28,7 +28,7 @@ export async function getProducts(): Promise<Product[]> {
 
       if (error) {
         console.error("Supabase admin getProducts error:", error);
-      } else if (data && data.length > 0) {
+      } else if (data) {
         return data.map(mapSupabaseRowToProduct);
       }
     } catch (err) {

@@ -17,7 +17,7 @@ async function readDB(): Promise<DB> {
     const raw = await fs.readFile(DB_PATH, "utf-8");
     return JSON.parse(raw) as DB;
   } catch {
-    // First run — seed with mock data
+    // First run — start with an empty catalog
     const seed: DB = { products: mockProducts, orders: mockOrders };
     await writeDB(seed);
     return seed;
