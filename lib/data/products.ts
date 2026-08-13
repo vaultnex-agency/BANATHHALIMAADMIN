@@ -88,21 +88,33 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
 export async function createProduct(product: Product): Promise<Product> {
   const supabase = getSupabaseAdminClient();
   if (supabase) {
-    try {
-      const dbRow = mapProductToSupabaseRow(product);
-      const { data, error } = await supabase
-        .from(TABLES.PRODUCTS)
-        .insert([dbRow])
-        .select()
-        .single();
+    let finalSlug = product.slug;
 
-      if (error) {
-        console.error("Supabase admin createProduct error:", error);
-      } else if (data) {
-        return mapSupabaseRowToProduct(data);
-      }
-    } catch (err) {
-      console.error("Supabase admin createProduct exception:", err);
+    // Resolve duplicate slugs automatically so products with the same name can be created
+    const { data: existing } = await supabase
+      .from(TABLES.PRODUCTS)
+      .select("id")
+      .eq("slug", finalSlug);
+
+    if (existing && existing.length > 0) {
+      const suffix = Math.random().toString(36).substring(2, 6);
+      finalSlug = `${finalSlug}-${suffix}`;
+    }
+
+    const dbRow = mapProductToSupabaseRow({ ...product, slug: finalSlug });
+    const { data, error } = await supabase
+      .from(TABLES.PRODUCTS)
+      .insert([dbRow])
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Supabase admin createProduct error:", error);
+      throw new Error(`Database insert failed: ${error.message}`);
+    }
+
+    if (data) {
+      return mapSupabaseRowToProduct(data);
     }
   }
 
@@ -115,26 +127,25 @@ export async function updateProduct(
 ): Promise<Product | null> {
   const supabase = getSupabaseAdminClient();
   if (supabase) {
-    try {
-      const dbRow = mapProductToSupabaseRow({
-        ...updates,
-        updatedAt: new Date().toISOString(),
-      });
+    const dbRow = mapProductToSupabaseRow({
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    });
 
-      const { data, error } = await supabase
-        .from(TABLES.PRODUCTS)
-        .update(dbRow)
-        .eq("id", id)
-        .select()
-        .single();
+    const { data, error } = await supabase
+      .from(TABLES.PRODUCTS)
+      .update(dbRow)
+      .eq("id", id)
+      .select()
+      .single();
 
-      if (error) {
-        console.error("Supabase admin updateProduct error:", error);
-      } else if (data) {
-        return mapSupabaseRowToProduct(data);
-      }
-    } catch (err) {
-      console.error("Supabase admin updateProduct exception:", err);
+    if (error) {
+      console.error("Supabase admin updateProduct error:", error);
+      throw new Error(`Database update failed: ${error.message}`);
+    }
+
+    if (data) {
+      return mapSupabaseRowToProduct(data);
     }
   }
 
@@ -144,21 +155,19 @@ export async function updateProduct(
 export async function deleteProduct(id: string): Promise<boolean> {
   const supabase = getSupabaseAdminClient();
   if (supabase) {
-    try {
-      const { error } = await supabase
-        .from(TABLES.PRODUCTS)
-        .delete()
-        .eq("id", id);
+    const { error } = await supabase
+      .from(TABLES.PRODUCTS)
+      .delete()
+      .eq("id", id);
 
-      if (error) {
-        console.error("Supabase admin deleteProduct error:", error);
-      } else {
-        return true;
-      }
-    } catch (err) {
-      console.error("Supabase admin deleteProduct exception:", err);
+    if (error) {
+      console.error("Supabase admin deleteProduct error:", error);
+      throw new Error(`Database delete failed: ${error.message}`);
     }
+
+    return true;
   }
 
   return dbDeleteProduct(id);
 }
+
