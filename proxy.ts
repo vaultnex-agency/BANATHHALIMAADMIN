@@ -34,11 +34,13 @@ export async function proxy(request: NextRequest) {
     },
   });
 
+  // Refresh the user session
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isLoginPage = request.nextUrl.pathname.startsWith("/login");
+  const pathname = request.nextUrl.pathname;
+  const isLoginPage = pathname.startsWith("/login");
 
   if (isLoginPage) {
     if (user) {
@@ -49,11 +51,16 @@ export async function proxy(request: NextRequest) {
 
   // Protect all dashboard, product, and order routes
   if (!user) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = "/login";
+    return NextResponse.redirect(loginUrl);
   }
 
   return response;
 }
+
+// Export as both proxy and middleware for seamless Next.js compatibility
+export const middleware = proxy;
 
 export const config = {
   matcher: [

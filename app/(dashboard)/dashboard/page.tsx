@@ -131,49 +131,57 @@ export default async function AdminDashboardPage() {
           </Link>
         </div>
 
-        <div className="divide-y divide-neutral-100">
-          {orders.slice(0, 5).map((order) => (
-            <div
-              key={order.id}
-              className="p-5 flex items-center justify-between hover:bg-neutral-50/60 transition-colors"
-            >
-              <div className="flex items-center space-x-4">
-                <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center text-xs font-semibold text-neutral-700 shrink-0">
-                  {order.customer.fullName.substring(0, 2).toUpperCase()}
-                </div>
-                <div>
-                  <div className="flex items-center space-x-2">
-                    <span className="font-mono text-xs font-semibold text-neutral-900">
-                      {order.orderNumber || order.id}
-                    </span>
-                    <span className="text-neutral-300">•</span>
-                    <span className="text-sm font-medium text-neutral-900">
-                      {order.customer.fullName}
-                    </span>
+        {orders.length === 0 ? (
+          <div className="p-12 text-center">
+            <ShoppingBag className="w-10 h-10 text-neutral-300 mx-auto mb-3" />
+            <p className="text-sm font-medium text-neutral-900">No orders yet</p>
+            <p className="text-xs text-neutral-400 mt-1">Customer orders placed on the storefront will appear here.</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-neutral-100">
+            {orders.slice(0, 5).map((order) => (
+              <div
+                key={order.id}
+                className="p-5 flex items-center justify-between hover:bg-neutral-50/60 transition-colors"
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center text-xs font-semibold text-neutral-700 shrink-0">
+                    {order.customer?.fullName ? order.customer.fullName.substring(0, 2).toUpperCase() : "CU"}
                   </div>
-                  <div className="text-xs text-neutral-400 mt-0.5">
-                    {order.items.length} item(s) • {new Date(order.createdAt).toLocaleDateString("en-AE", { month: "short", day: "numeric" })}
+                  <div>
+                    <div className="flex items-center space-x-2">
+                      <span className="font-mono text-xs font-semibold text-neutral-900">
+                        {order.orderNumber || order.id}
+                      </span>
+                      <span className="text-neutral-300">•</span>
+                      <span className="text-sm font-medium text-neutral-900">
+                        {order.customer?.fullName || "Customer"}
+                      </span>
+                    </div>
+                    <div className="text-xs text-neutral-400 mt-0.5">
+                      {order.items?.length || 0} item(s) • {new Date(order.createdAt).toLocaleDateString("en-AE", { month: "short", day: "numeric" })}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="flex items-center space-x-6">
-                <OrderStatusBadge status={order.status} />
-                <div className="text-right">
-                  <p className="text-sm font-semibold text-neutral-900 font-mono">
-                    AED {order.total.toLocaleString("en-AE")}
-                  </p>
+                <div className="flex items-center space-x-6">
+                  <OrderStatusBadge status={order.status} />
+                  <div className="text-right">
+                    <p className="text-sm font-semibold text-neutral-900 font-mono">
+                      AED {order.total.toLocaleString("en-AE")}
+                    </p>
+                  </div>
+                  <Link
+                    href={`/orders/${order.id}`}
+                    className="p-2 text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors"
+                  >
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
                 </div>
-                <Link
-                  href={`/orders/${order.id}`}
-                  className="p-2 text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors"
-                >
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

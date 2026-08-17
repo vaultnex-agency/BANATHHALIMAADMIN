@@ -89,15 +89,12 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
       dupatta: "2.25 m",
     },
     inStock: initialData?.inStock ?? true,
-    stockCount: initialData?.stockCount || 10,
+    stockCount: initialData?.stockCount ?? 10,
     isFeatured: initialData?.isFeatured ?? false,
     isBestSeller: initialData?.isBestSeller ?? false,
     isNew: initialData?.isNew ?? true,
-    images: initialData?.images || ["/product-teal.png"],
-    colours: initialData?.colours || [
-      { name: "Teal", hex: "#1a7a7a" },
-      { name: "Rose", hex: "#d4829e" },
-    ],
+    images: initialData?.images || [],
+    colours: initialData?.colours || [],
     sizes: initialData?.sizes || [],
     occasion: initialData?.occasion || ["Festive", "Wedding"],
   });
@@ -278,8 +275,8 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
         originalPrice: Number(formData.originalPrice),
         stockCount: Number(formData.stockCount),
         currency: "AED",
-        rating: initialData?.rating || 4.8,
-        reviewCount: initialData?.reviewCount || 10,
+        rating: initialData?.rating ?? 5.0,
+        reviewCount: initialData?.reviewCount ?? 0,
         sizes: formData.sizes,
         createdAt: initialData?.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -798,30 +795,36 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
         </div>
 
         <div className="space-y-4">
-          {formData.colours.map((col, idx) => (
-            <div key={idx} className="flex items-center space-x-4">
-              <input
-                type="color"
-                value={col.hex}
-                onChange={(e) => handleUpdateColour(idx, "hex", e.target.value)}
-                className="w-10 h-10 rounded-xl border border-neutral-200 cursor-pointer p-0.5 bg-neutral-50"
-              />
-              <input
-                type="text"
-                value={col.name}
-                onChange={(e) => handleUpdateColour(idx, "name", e.target.value)}
-                className="flex-1 bg-neutral-50/50 border border-neutral-200 rounded-xl px-4 py-2.5 text-neutral-900 focus:outline-none focus:border-amber-500 focus:bg-white text-sm transition-all"
-                placeholder="Colour name (e.g. Teal)"
-              />
-              <button
-                type="button"
-                onClick={() => handleRemoveColour(idx)}
-                className="p-2 text-neutral-400 hover:text-rose-600 rounded-lg"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          ))}
+          {formData.colours.length === 0 ? (
+            <p className="text-xs text-neutral-400 py-2">
+              No colours added yet. Click &quot;+ Add colour&quot; to specify available colors.
+            </p>
+          ) : (
+            formData.colours.map((col, idx) => (
+              <div key={idx} className="flex items-center space-x-4">
+                <input
+                  type="color"
+                  value={col.hex}
+                  onChange={(e) => handleUpdateColour(idx, "hex", e.target.value)}
+                  className="w-10 h-10 rounded-xl border border-neutral-200 cursor-pointer p-0.5 bg-neutral-50"
+                />
+                <input
+                  type="text"
+                  value={col.name}
+                  onChange={(e) => handleUpdateColour(idx, "name", e.target.value)}
+                  className="flex-1 bg-neutral-50/50 border border-neutral-200 rounded-xl px-4 py-2.5 text-neutral-900 focus:outline-none focus:border-amber-500 focus:bg-white text-sm transition-all"
+                  placeholder="Colour name (e.g. Teal)"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleRemoveColour(idx)}
+                  className="p-2 text-neutral-400 hover:text-rose-600 rounded-lg"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))
+          )}
         </div>
       </div>
 

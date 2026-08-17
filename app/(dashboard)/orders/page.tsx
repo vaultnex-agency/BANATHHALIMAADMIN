@@ -27,63 +27,75 @@ export default async function AdminOrdersPage() {
 
       {/* Orders Table Container */}
       <div className="bg-white rounded-2xl border border-neutral-200/80 shadow-xs overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-neutral-700 border-collapse">
-            <thead>
-              <tr className="bg-neutral-50/80 text-[11px] uppercase tracking-wider text-neutral-400 font-semibold border-b border-neutral-100">
-                <th className="px-6 py-4">Order ID</th>
-                <th className="px-6 py-4">Customer</th>
-                <th className="px-6 py-4">Items</th>
-                <th className="px-6 py-4">Total</th>
-                <th className="px-6 py-4">Date</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-neutral-100">
-              {orders.map((order) => (
-                <tr key={order.id} className="hover:bg-neutral-50/60 transition-colors">
-                  <td className="px-6 py-4 font-mono text-xs font-semibold text-neutral-900">
-                    {order.orderNumber || order.id}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="font-medium text-neutral-900 text-sm">
-                      {order.customer.fullName}
-                    </div>
-                    <div className="text-xs text-neutral-400 mt-0.5">
-                      {order.customer.phone}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-xs font-medium text-neutral-600">
-                    {order.items.length} item(s)
-                  </td>
-                  <td className="px-6 py-4 font-mono text-sm font-semibold text-neutral-900">
-                    AED {order.total.toLocaleString("en-AE")}
-                  </td>
-                  <td className="px-6 py-4 text-xs text-neutral-500 font-normal">
-                    {new Date(order.createdAt).toLocaleDateString("en-AE", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })}
-                  </td>
-                  <td className="px-6 py-4">
-                    <OrderStatusBadge status={order.status} />
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <Link
-                      href={`/orders/${order.id}`}
-                      className="inline-flex items-center gap-1.5 text-xs bg-neutral-100 hover:bg-neutral-950 hover:text-white text-neutral-700 font-medium px-3.5 py-1.5 rounded-xl transition-all shadow-2xs"
-                    >
-                      <Eye className="w-3.5 h-3.5" />
-                      <span>Details</span>
-                    </Link>
-                  </td>
+        {orders.length === 0 ? (
+          <div className="p-16 text-center">
+            <div className="w-12 h-12 rounded-2xl bg-neutral-100 text-neutral-400 flex items-center justify-center mx-auto mb-4">
+              <Eye className="w-6 h-6" />
+            </div>
+            <h3 className="font-serif text-lg font-bold text-neutral-900">No orders yet</h3>
+            <p className="text-xs text-neutral-500 max-w-sm mx-auto mt-1">
+              Customer orders placed on the storefront will automatically appear here.
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm text-neutral-700 border-collapse">
+              <thead>
+                <tr className="bg-neutral-50/80 text-[11px] uppercase tracking-wider text-neutral-400 font-semibold border-b border-neutral-100">
+                  <th className="px-6 py-4">Order ID</th>
+                  <th className="px-6 py-4">Customer</th>
+                  <th className="px-6 py-4">Items</th>
+                  <th className="px-6 py-4">Total</th>
+                  <th className="px-6 py-4">Date</th>
+                  <th className="px-6 py-4">Status</th>
+                  <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-neutral-100">
+                {orders.map((order) => (
+                  <tr key={order.id} className="hover:bg-neutral-50/60 transition-colors">
+                    <td className="px-6 py-4 font-mono text-xs font-semibold text-neutral-900">
+                      {order.orderNumber || order.id}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="font-medium text-neutral-900 text-sm">
+                        {order.customer?.fullName || "Customer"}
+                      </div>
+                      <div className="text-xs text-neutral-400 mt-0.5">
+                        {order.customer?.phone || ""}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-xs font-medium text-neutral-600">
+                      {order.items?.length || 0} item(s)
+                    </td>
+                    <td className="px-6 py-4 font-mono text-sm font-semibold text-neutral-900">
+                      AED {order.total.toLocaleString("en-AE")}
+                    </td>
+                    <td className="px-6 py-4 text-xs text-neutral-500 font-normal">
+                      {new Date(order.createdAt).toLocaleDateString("en-AE", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </td>
+                    <td className="px-6 py-4">
+                      <OrderStatusBadge status={order.status} />
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <Link
+                        href={`/orders/${order.id}`}
+                        className="inline-flex items-center gap-1.5 text-xs bg-neutral-100 hover:bg-neutral-950 hover:text-white text-neutral-700 font-medium px-3.5 py-1.5 rounded-xl transition-all shadow-2xs"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>Details</span>
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
