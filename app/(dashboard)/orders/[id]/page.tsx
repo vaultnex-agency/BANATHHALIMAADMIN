@@ -1,4 +1,5 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import { ArrowLeft, User, MapPin, CreditCard, ShoppingBag, Save } from "lucide-react";
 import { getOrderById } from "@/lib/data/orders";
@@ -23,6 +24,9 @@ export default async function AdminOrderDetailPage({ params }: Params) {
     if (newStatus && order) {
       const { updateOrderStatus } = await import("@/lib/data/orders");
       await updateOrderStatus(order.id, newStatus);
+      revalidatePath(`/orders/${order.id}`);
+      revalidatePath("/orders");
+      redirect(`/orders/${order.id}`);
     }
   }
 
